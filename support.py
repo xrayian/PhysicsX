@@ -2,7 +2,11 @@ from math import sqrt, pow
 
 '''
 Sterilized for using as core
+core_version: 0.1
+    changes in 0.1:
+        [1] Added 'self.Value==0' Checks on Calculations with divisons to prevent breaking
 '''
+
 class Velocity:
     ''' 
     Velocity class: currently complete
@@ -18,10 +22,14 @@ class Velocity:
         if self.distance is None or self.acceleration is None:
             return
         if self.initial_velocity is None:
+            
             result = sqrt(2 * self.acceleration * self.distance)
+        
         else:
+
             initial_velocity_squared = pow(self.initial_velocity, 2)
             result = sqrt(initial_velocity_squared + 2 * self.acceleration * self.distance)
+        
         final_result = round (result, 3)
         return str(final_result)
     
@@ -29,7 +37,11 @@ class Velocity:
         #Verifying Crucial Arguments
         if self.distance is None or self.time is None:
             return
-        result = self.distance / self.time
+        if self.distance == 0 or self.time == 0:
+            return
+        
+        result = self.distance / self.time #flag: division
+        
         final_result = round (result, 3)
         return str(final_result)
     
@@ -37,12 +49,17 @@ class Velocity:
         #Verifying Crucial Arguments
         if self.acceleration is None or self.time is None:
             return
+
         result = self.initial_velocity + (self.acceleration * self.time)
+        
         final_result = round (result, 3)
         return str(final_result)
 
     def Proofchecker(self):
-        result = float(self.calculate_without_distance())
+        try:
+            result = float(self.calculate_without_distance())
+        except:
+            return "[ProofCheck_Error]: Invalid Query"
         distance = self.initial_velocity*self.time + .5*self.acceleration*(pow(self.time,2))
         if float(distance) == self.distance:
             return "Velocity is %s m/s" % str(round(result, 3))
@@ -50,24 +67,35 @@ class Velocity:
             return "[ProofCheck_Error]: Distance value is incompatible with acceleration value"
 
     def calculate(self):
+
         if self.acceleration is None:
+
             velocity = self.calculate_without_acceleration()
+
             if velocity is not None:
                 return "Velocity is %s m/s" % velocity
+
             else:
                 return "[Critical_Error]: Crucial values are absent"
+
         elif self.distance is None:
+
             velocity = self.calculate_without_distance()
+
             if velocity is not None:
                 return "Velocity is %s m/s" % velocity
+
             else:
                 return "[Critical_Error]: Crucial values are absent"
+
         elif self.time is None:
+
             velocity = self.calculate_without_time()
             if velocity is not None:
                 return "Velocity is %s m/s" % velocity
             else:
                 return "[Critical_Error]: Crucial values are absent"
+
         else:
             return self.Proofchecker()
 
@@ -83,6 +111,7 @@ class Acceleration:
 
     def calculate_without_time(self):
         #must have distance and either initial_velocity or final_velocity
+
         if self.distance is None:
             return
         if self.final_velocity is None and self.initial_velocity == 0:   
@@ -90,34 +119,47 @@ class Acceleration:
 
         if self.final_velocity is None: 
             self.final_velocity = 0
-        result = (pow(self.final_velocity, 2) - pow(self.initial_velocity, 2)) / (2 * self.distance)
+
+        result = (pow(self.final_velocity, 2) - pow(self.initial_velocity, 2)) / (2 * self.distance) #flag: division
         result = round (result, 3)
+
         return str(result)
     
     def calculate_without_distance(self):
-        if self.time is None:
+
+        if self.time is None or self.time == 0:
             return
         elif self.final_velocity is None and self.initial_velocity == 0:
             return
         if self.final_velocity is None: 
             self.final_velocity = 0
-        result = (self.final_velocity - self.initial_velocity) / self.time
+
+        result = (self.final_velocity - self.initial_velocity) / self.time #flag: division
         final_result = round (result, 3)
+        
         return str(final_result)
     
     def calculate_without_final_velocity(self):
-        if self.time is None or self.distance is None:
+        if self.time is None or self.distance is None or self.time == 0:
             return
+        
         covered_distance =  self.distance - (self.initial_velocity * self.time) 
         time_squared = 0.5 * pow(self.time, 2)
-        result = covered_distance / time_squared
+        result = covered_distance / time_squared #flag: division
+        
         result = round (result, 3) 
         return str(result)
+    
     def Proofchecker(self):
-        acceleration = float(self.calculate_without_distance())
-        actual_distance = self.initial_velocity*self.time + .5*acceleration*(pow(self.time,2))
-        if self.distance == float(actual_distance):
+        try:
+            acceleration = float(self.calculate_without_distance())
+            actual_distance = float(self.initial_velocity*self.time + .5*acceleration*(pow(self.time,2)))
+        except:
+            return "[ProofCheck_Error]: Invalid Question "
+
+        if self.distance == actual_distance:
             return "Acceleration is %s m/s²" % acceleration
+        
         else:
             return "[ProofCheck_Error]: Distance value is incompatible with Acceleration value "
 
@@ -157,10 +199,15 @@ class Time():
     def calculate_without_final_velocity(self):
         if self.distance is None or self.acceleration is None:
             return
+        
         if self.initial_velocity == 0:
-            result = sqrt((2 * self.distance / self.acceleration))
+            if self.acceleration == 0:
+                return
+            
+            result = sqrt((2 * self.distance / self.acceleration)) #flag: division
             result = round (result, 3)
             return "Elapsed time %s seconds" % str(result)
+        
         else:
             return "[Math_Error]: Can't solve"
     
@@ -171,7 +218,10 @@ class Time():
             return
         if self.final_velocity is None:
             self.final_velocity = 0
-        result = (self.final_velocity - self.initial_velocity) / self.acceleration
+        if self.acceleration == 0:
+            return
+
+        result = (self.final_velocity - self.initial_velocity) / self.acceleration #flag: division
         final_result = round (result, 3)
         return str(final_result)
     
@@ -181,7 +231,7 @@ class Time():
         if self.final_velocity is None or self.final_velocity == 0:
             return
         try:
-            result = self.distance / self.final_velocity
+            result = self.distance / self.final_velocity #flag: division
         except:
             return "[Error:DT_2]: Impossible value"
 
@@ -210,6 +260,11 @@ class Time():
             else:
                 return "[Critical_Error]: Crucial values are absent or absurd"
 
+        else:
+            return "[Critical_Error]: Too many variable's to process"
+
+            
+
 class Distance():
     '''
     done
@@ -235,13 +290,16 @@ class Distance():
         return str(result)
     
     def calculate_without_time(self):
-        if self.acceleration is None:
+        if self.acceleration is None or self.acceleration == 0:
             return
         if self.final_velocity is None and self.initial_velocity == 0:
             return
+        if self.final_velocity is None and self.final_velocity != 0:
+            self.final_velocity = 0
+
         final_velocity_squared = pow(self.final_velocity, 2)
         initial_velocity_squared = pow(self.initial_velocity, 2)
-        result = (final_velocity_squared - initial_velocity_squared) / (2 * self.acceleration)
+        result = (final_velocity_squared - initial_velocity_squared) / (2 * self.acceleration) #flag: division
         result = round (result, 3)
         return result
     
@@ -265,5 +323,8 @@ class Distance():
                 return "Covered distance %s meters" % distance
             else:
                 return "[Critical_Error]: Crucial values are absent "
+        
+        else:
+            return "[Critical_Error]: Too many variable's to process"
 
 
